@@ -1,0 +1,220 @@
+import { createContext, useContext, useEffect, useReducer, useRef } from "react";
+import PropTypes from "prop-types";
+import axios from "axios";
+import jwt from "jsonwebtoken";
+
+
+
+const HANDLERS = {
+  INITIALIZE: "INITIALIZE",
+  SIGN_IN: "SIGN_IN",
+  SIGN_OUT: "SIGN_OUT",
+};
+
+const initialState = {
+  isAuthenticated: false,
+  isLoading: true,
+  user: null
+};
+
+const handlers = {
+  [HANDLERS.INITIALIZE]: (state, action) => {
+    const { user, token } = action.payload;
+
+    return {
+      ...state,
+      ...(user
+        ? {
+            isAuthenticated: true,
+            isLoading: false,
+            user: user,
+            token: token,
+          }
+        : {
+            isLoading: false,
+          }),
+    };
+  },
+  [HANDLERS.SIGN_IN]: (state, action) => {
+    const { user, token } = action.payload;
+
+    return {
+      ...state,
+      isAuthenticated: true,
+      user: user,
+      token: token,
+    };
+  },
+  [HANDLERS.SIGN_OUT]: (state) => {
+    return {
+      ...state,
+      isAuthenticated: false,
+      user: null,
+    };
+  },
+};
+
+const reducer = (state, action) =>
+  handlers[action.type] ? handlers[action.type](state, action) : state;
+
+// The role of this context is to propagate authentication state through the App tree.
+
+export const AuthContext = createContext();
+
+export const AuthProvider = (props) => {
+  const { children } = props;
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const initialized = useRef(false);
+
+  const initialize = async () => {
+    if (initialized.current) {
+      return;
+    }
+
+    initialized.current = true;
+
+    try {
+      const isAuthenticated = window.sessionStorage.getItem("authenticated") === "true";
+      const token = window.sessionStorage.getItem("token");
+
+      if (isAuthenticated && token) {
+        const decodedToken = jwt.decode(token);
+        const TokenExpired = isTokenExpired(token);
+
+        if (TokenExpired) {
+          // Token expirado, faça o logout
+          signOut();
+        } else {
+          // Token válido, continue com o usuário autenticado
+          const user = {
+            nome: decodedToken.nome,
+            tipo: decodedToken.tipo,
+            departamento: decodedToken.departamento,
+            // ... outras informações do usuário
+          };
+
+          dispatch({
+            type: HANDLERS.INITIALIZE,
+            payload: user,
+          });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
+
+  const isTokenExpired = (token) => {
+    try {
+      const decodedToken = jwt.decode(token);
+      const now = Date.now() / 1000; // em segundos
+  
+      return decodedToken.exp < now;
+    } catch (error) {
+      console.error(error);
+      return true; // Trate como expirado se houver algum erro na decodificação
+    }
+  };
+ 
+
+  const signIn = async (email, senha) => {
+    try {
+      // Make the sign-in request to the server
+      const user = await axios.post("http://localhost:4000/auth/login", {
+        email,
+        senha,
+      });
+
+      // Extract user information from the response
+      const { token, nome, tipo, departamento } = user.data;
+      // Save authentication status in session storage
+      window.sessionStorage.setItem("authenticated", "true");
+      window.sessionStorage.setItem("token", token);
+      window.sessionStorage.setItem("nome", nome);
+      window.sessionStorage.setItem("tipo", tipo);
+      window.sessionStorage.setItem("departamento", departamento);
+      // Dispatch the user information to the Redux store
+      dispatch({
+        type: HANDLERS.SIGN_IN,
+        payload: { user, token },
+      });
+
+      // Optionally, you can return the user data or any other information
+      return user;
+    } catch (err) {
+      console.error(err);
+
+      // Optionally, handle the error or return an error indication
+      throw err;
+    }
+  };
+
+  
+
+  const getUserInfoUsingCredentials = async (email, senha) => {
+    try {
+      // Make a request to your server to get user information using email and senha
+      const response = await axios.post("http://localhost:4000/auth/login", {
+        email,
+        senha,
+      });
+
+      const { token, nome, tipo, departamento } = response.data;
+
+      // Save the new token in session storage
+      window.sessionStorage.setItem("token", token);
+
+      return { nome, tipo, departamento };
+    } catch (err) {
+      console.error(err);
+      return err;
+    }
+  };
+
+  const signUpAdmin = async (email, nome, senha, tipo = 1, departamento = 1) => {
+    await axios.post("http://localhost:4000/auth/register", {
+      email,
+      nome,
+      senha,
+      tipo,
+      departamento,
+    });
+  };
+
+  const signOut = () => {
+    window.sessionStorage.removeItem("authenticated");
+    window.sessionStorage.removeItem("token");
+    dispatch({
+      type: HANDLERS.SIGN_OUT,
+    });
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        ...state,
+        // skip,
+        signIn,
+        signUpAdmin,
+        signOut,
+        getUserInfo,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+  
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node,
+};
+
+export const AuthConsumer = AuthContext.Consumer;
+
+export const useAuthContext = () => useContext(AuthContext);

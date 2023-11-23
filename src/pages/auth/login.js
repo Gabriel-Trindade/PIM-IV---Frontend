@@ -25,8 +25,8 @@ const Page = () => {
   const [method, setMethod] = useState("email");
   const formik = useFormik({
     initialValues: {
-      email: "demo@devias.io",
-      password: "Password123!",
+      email: "",
+      password: "",
       submit: null,
     },
     validationSchema: Yup.object({
@@ -35,28 +35,39 @@ const Page = () => {
         .max(255)
         .required("Preencha com um email."),
       password: Yup.string().max(255).required("Senha é necessária."),
-      name: Yup.string().max(255).required("Nome é necessário."),
     }),
     onSubmit: async (values, helpers) => {
       try {
         await auth.signIn(values.email, values.password);
-        router.push("/");
+        console.log(values);
+        router.push("/customers");
+        helpers.setStatus({ success: true });
+        helpers.setSubmitting(true);
       } catch (err) {
+        // If an error occurs during sign-up, handle the error
+        if (err.response && err.response.data) {
+          // Use the server-provided error message
+          console.log("Erro do servidor:", err.response.data);
+          helpers.setErrors({ submit: err.response.data });
+        } else {
+          // Use a default error message or log the error for debugging
+          console.log("Erro do servidor:", err.response);
+          helpers.setErrors({ submit: "Erro desconhecido" });;
+        }
+
+        // Update other form-related state if needed
         helpers.setStatus({ success: false });
-        helpers.setErrors({ submit: err.message });
         helpers.setSubmitting(false);
       }
     },
   });
 
+
+
   const handleMethodChange = useCallback((event, value) => {
     setMethod(value);
   }, []);
 
-  const handleSkip = useCallback(() => {
-    auth.skip();
-    router.push("/");
-  }, [auth, router]);
 
   return (
     <>
@@ -126,24 +137,16 @@ const Page = () => {
                   />
                 </Stack>
                 {formik.errors.submit && (
-                  <Typography color="error" sx={{ mt: 3 }} variant="body2">
-                    {formik.errors.submit}
-                  </Typography>
-                )}
+                <Typography color="error" sx={{ mt: 3 }} variant="body2">
+                  {formik.errors.submit}
+                </Typography>
+              )}
                 <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
                   Continue
                 </Button>
-                <Button fullWidth size="large" sx={{ mt: 3 }} onClick={handleSkip}>
-                  Skip authentication
-                </Button>
-                <Alert color="primary" severity="info" sx={{ mt: 3 }}>
-                  <div>
-                    You can use <b>demo@devias.io</b> and password <b>Password123!</b>
-                  </div>
-                </Alert>
               </form>
             )}
-            {method === "phoneNumber" && (
+            {method === "funcionario" && (
               <form noValidate onSubmit={formik.handleSubmit}>
                 <Stack spacing={3}>
                   <TextField
