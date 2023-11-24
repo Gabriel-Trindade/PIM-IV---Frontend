@@ -56,31 +56,31 @@ export const CustomersTable = (props) => {
                   />
                 </TableCell>
                 <TableCell>
-                  Name
+                  Nome
                 </TableCell>
                 <TableCell>
-                  Email
+                  Cargo
                 </TableCell>
                 <TableCell>
-                  Location
+                  Departamento
                 </TableCell>
                 <TableCell>
-                  Phone
+                  Celular
                 </TableCell>
                 <TableCell>
-                  Signed Up
+                  Registrado em
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((customer) => {
-                const isSelected = selected.includes(customer.id);
-                const createdAt = format(customer.createdAt, 'dd/MM/yyyy');
+              {items.map((funcionario) => {
+                const isSelected = selected.includes(funcionario.id);
+                const createdAt = funcionario.dtAdmissao
 
                 return (
                   <TableRow
                     hover
-                    key={customer.id}
+                    key={funcionario.id}
                     selected={isSelected}
                   >
                     <TableCell padding="checkbox">
@@ -88,9 +88,9 @@ export const CustomersTable = (props) => {
                         checked={isSelected}
                         onChange={(event) => {
                           if (event.target.checked) {
-                            onSelectOne?.(customer.id);
+                            onSelectOne?.(funcionario.id);
                           } else {
-                            onDeselectOne?.(customer.id);
+                            onDeselectOne?.(funcionario.id);
                           }
                         }}
                       />
@@ -101,22 +101,19 @@ export const CustomersTable = (props) => {
                         direction="row"
                         spacing={2}
                       >
-                        <Avatar src={customer.avatar}>
-                          {getInitials(customer.name)}
-                        </Avatar>
                         <Typography variant="subtitle2">
-                          {customer.name}
+                          {funcionario.nome}
                         </Typography>
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      {customer.email}
+                      {funcionario.cargo}
                     </TableCell>
                     <TableCell>
-                      {customer.address.city}, {customer.address.state}, {customer.address.country}
+                      {`${funcionario.endereco}`}
                     </TableCell>
                     <TableCell>
-                      {customer.phone}
+                      {funcionario.telefone}
                     </TableCell>
                     <TableCell>
                       {createdAt}

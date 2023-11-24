@@ -38,7 +38,7 @@ const Page = () => {
     }),
     onSubmit: async (values, helpers) => {
       try {
-        await auth.signUpAdmin(values.email, values.name, values.password, 1, 1);
+        await auth.signUpAdmin(values.email, values.name, values.password, 2, 1);
         console.log(values);
         helpers.setStatus({ success: true });
         helpers.setErrors({ submit: "Registrado com sucesso!" });
