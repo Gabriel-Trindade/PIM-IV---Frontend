@@ -129,7 +129,7 @@ export const AuthProvider = (props) => {
 
   const signIn = async (email, senha) => {
     try {
-      const user = await axios.post("http://localhost:4000/auth/login", {
+      const user = await axios.post("https://pimbackend.onrender.com/auth/login", {
         email,
         senha,
       });
@@ -193,12 +193,18 @@ export const AuthProvider = (props) => {
     }
   };
 
-  const signUp = async (email, name, password) => {
-    throw new Error("Sign up is not implemented");
+  const signUpFunc = async (email, nome, senha, tipo = 1, departamento) => {
+    await axios.post("https://pimbackend.onrender.com/auth/register", {
+      email,
+      nome,
+      senha,
+      tipo,
+      departamento,
+    });
   };
 
-  const signUpAdmin = async (email, nome, senha, tipo = 1, departamento = 1) => {
-    await axios.post("http://localhost:4000/auth/register", {
+  const signUpAdmin = async (email, nome, senha, tipo = 2, departamento) => {
+    await axios.post("https://pimbackend.onrender.com/auth/register", {
       email,
       nome,
       senha,
@@ -219,7 +225,7 @@ export const AuthProvider = (props) => {
         ...state,
         skip,
         signIn,
-        signUp,
+        signUpFunc,
         signOut,
         signUpAdmin,
         getUserInfo,

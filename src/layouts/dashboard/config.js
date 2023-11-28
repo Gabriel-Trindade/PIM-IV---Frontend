@@ -20,7 +20,7 @@ export const items = [
   // },
   {
     title: 'Funcionários',
-    path: '/customers',
+    path: '/funcionarios',
     icon: (
       <SvgIcon fontSize="small">
         <UsersIcon />
@@ -54,18 +54,27 @@ export const items = [
       </SvgIcon>
     )
   },
+  // {
+  //   title: 'Login',
+  //   path: '/auth/login',
+  //   icon: (
+  //     <SvgIcon fontSize="small">
+  //       <LockClosedIcon />
+  //     </SvgIcon>
+  //   )
+  // },
   {
-    title: 'Login',
-    path: '/auth/login',
+    title: 'Cadastrar Login Funcionário',
+    path: '/auth/registerFunc',
     icon: (
       <SvgIcon fontSize="small">
-        <LockClosedIcon />
+        <UserPlusIcon />
       </SvgIcon>
     )
   },
   {
-    title: 'Registrar Funcionário',
-    path: '/auth/register',
+    title: 'Cadastrar Novo Funcionário',
+    path: '/registernewFunc',
     icon: (
       <SvgIcon fontSize="small">
         <UserPlusIcon />

@@ -53,10 +53,10 @@ const Page = () => {
             break;
         }
         console.log(departamentoId)
-        await auth.signUpFunc(values.email, values.name, values.password, 2, departamentoId);
+        await auth.signUpAdmin(values.email, values.name, values.password, 1, departamentoId);
         console.log(values);
         helpers.setStatus({ success: true });
-        helpers.setErrors({ submit: "Funcionário registrado com sucesso!" });
+        helpers.setErrors({ submit: "Funcionario registrado com sucesso!" });
         helpers.setSubmitting(true);
       } catch (err) {
         console.log(err);
@@ -104,12 +104,9 @@ const Page = () => {
         >
           <div>
             <Stack spacing={1} sx={{ mb: 3 }}>
-              <Typography variant="h4">Registrar</Typography>
+              <Typography variant="h4">Registrar Funcionario</Typography>
               <Typography color="text.secondary" variant="body2">
-                Já possui uma conta? &nbsp;
-                <Link component={NextLink} href="/auth/login" underline="hover" variant="subtitle2">
-                  Login
-                </Link>
+                Registre o funcionário de acordo com seu departamento.  &nbsp;
               </Typography>
             </Stack>
             <form noValidate onSubmit={formik.handleSubmit}>

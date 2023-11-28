@@ -1,13 +1,13 @@
 import Head from 'next/head';
 import { Box, Container, Stack, Typography, Unstable_Grid2 as Grid } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
-import { AccountProfileDetails } from 'src/sections/account/account-profile-details';
+import { editFunc } from 'src/sections/forms/edit-func-form';
 
 const Page = () => (
   <>
     <Head>
       <title>
-        Account | Devias Kit
+        Edição de funcionário | iStorm RH
       </title>
     </Head>
     <Box
@@ -20,21 +20,16 @@ const Page = () => (
       <Container maxWidth="lg">
         <Stack spacing={3}>
           <div>
-            <Typography variant="h4">
-              Account
-            </Typography>
-          </div>
-          <div>
             <Grid
               container
               spacing={3}
             >
               <Grid
                 xs={12}
-                md={6}
-                lg={8}
+                md={10}
+                lg={11}
               >
-                <AccountProfileDetails />
+                <editFunc />
               </Grid>
             </Grid>
           </div>

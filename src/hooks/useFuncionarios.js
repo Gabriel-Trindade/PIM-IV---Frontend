@@ -5,12 +5,28 @@ import axios from 'axios';
 const useFuncionarios = () => {
     const [funcionarios, setFuncionarios] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    function formatarData(dataString) {
+      const data = new Date(dataString);
+      const dia = data.getDate().toString().padStart(2, '0');
+      const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+      const ano = data.getFullYear();
+  
+      return `${dia}/${mes}/${ano}`;
+  }
   
     useEffect(() => {
       const fetchFuncionarios = async () => {
         try {
-          const response = await axios.get('http://localhost:4000/funcionarios');
-          setFuncionarios(response.data);
+          const departamentoId = localStorage.getItem('departamento');
+          console.log(departamentoId);
+          const response = await axios.get(`https://pimbackend.onrender.com/funcionarios/departamento/${departamentoId}`);
+          const funcionariosList = typeof response.data === 'object' ? response.data : [response.data];
+          console.log(typeof response.data)
+          funcionariosList.forEach((funcionario) => {
+            funcionario.dtAdmissao = formatarData(funcionario.dtAdmissao);
+          })
+          setFuncionarios(funcionariosList);
           setLoading(false);
           console.log(response.data)
         } catch (error) {
