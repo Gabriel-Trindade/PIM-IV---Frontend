@@ -15,13 +15,14 @@ import {
 } from '@mui/material';
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
-import { items } from './config';
+import  getItemsByType  from './config';
 import { SideNavItem } from './side-nav-item';
 
 export const SideNav = (props) => {
   const { open, onClose } = props;
   const pathname = usePathname();
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
+  const items = getItemsByType();
 
   const content = (
     <Scrollbar

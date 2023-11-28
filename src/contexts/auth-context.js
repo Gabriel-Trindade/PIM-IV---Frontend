@@ -141,10 +141,7 @@ export const AuthProvider = (props) => {
       localStorage.setItem("tipo", tipo);
       localStorage.setItem("departamento", departamento);
 
-      console.log("Token:", localStorage.getItem("token"));
-      console.log("Nome:", localStorage.getItem("nome"));
-      console.log("Tipo:", localStorage.getItem("tipo"));
-      console.log("Departamento:", localStorage.getItem("departamento"));
+  
 
       dispatch({
         type: HANDLERS.SIGN_IN,

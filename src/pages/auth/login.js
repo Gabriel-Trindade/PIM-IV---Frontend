@@ -22,7 +22,7 @@ import { Layout as AuthLayout } from "src/layouts/auth/layout";
 const Page = () => {
   const router = useRouter();
   const auth = useAuth();
-  const [method, setMethod] = useState("email");
+  const [method, setMethod] = useState("gerente");
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -40,7 +40,11 @@ const Page = () => {
       try {
         await auth.signIn(values.email, values.password);
         console.log(values);
-        router.push("/customers");
+        if (localStorage.getItem("tipo") === "1") {
+          router.push("/folhas");
+        } else {
+          router.push("/funcionarios");
+        }
         helpers.setStatus({ success: true });
         helpers.setSubmitting(true);
       } catch (err) {
@@ -52,7 +56,7 @@ const Page = () => {
         } else {
           // Use a default error message or log the error for debugging
           console.log("Erro do servidor:", err.response);
-          helpers.setErrors({ submit: "Erro desconhecido" });;
+          helpers.setErrors({ submit: "Erro desconhecido" });
         }
 
         // Update other form-related state if needed
@@ -62,12 +66,9 @@ const Page = () => {
     },
   });
 
-
-
   const handleMethodChange = useCallback((event, value) => {
     setMethod(value);
   }, []);
-
 
   return (
     <>
@@ -107,10 +108,10 @@ const Page = () => {
               </Typography>
             </Stack>
             <Tabs onChange={handleMethodChange} sx={{ mb: 3 }} value={method}>
-              <Tab label="Empresarial" value="email" />
-              <Tab label="Funcionário" value="phoneNumber" />
+              <Tab label="Empresarial" value="gerente" />
+              <Tab label="Funcionário" value="funcionario" />
             </Tabs>
-            {method === "email" && (
+            {method === "gerente" && (
               <form noValidate onSubmit={formik.handleSubmit}>
                 <Stack spacing={3}>
                   <TextField
@@ -137,10 +138,10 @@ const Page = () => {
                   />
                 </Stack>
                 {formik.errors.submit && (
-                <Typography color="error" sx={{ mt: 3 }} variant="body2">
-                  {formik.errors.submit}
-                </Typography>
-              )}
+                  <Typography color="error" sx={{ mt: 3 }} variant="body2">
+                    {formik.errors.submit}
+                  </Typography>
+                )}
                 <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
                   Continue
                 </Button>
@@ -153,7 +154,7 @@ const Page = () => {
                     error={!!(formik.touched.email && formik.errors.email)}
                     fullWidth
                     helperText={formik.touched.email && formik.errors.email}
-                    label="Email Cadastrado"
+                    label="email Cadastrado"
                     name="email"
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
@@ -180,11 +181,6 @@ const Page = () => {
                 <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
                   Continue
                 </Button>
-                <Alert color="primary" severity="info" sx={{ mt: 3 }}>
-                  <div>
-                    You can use <b>demo@devias.io</b> and password <b>Password123!</b>
-                  </div>
-                </Alert>
               </form>
             )}
           </div>

@@ -21,7 +21,7 @@ export const CustomersSearch = () => (
     <OutlinedInput
       defaultValue=""
       fullWidth
-      placeholder="Pesquisar Funcionários"
+      placeholder="Pesquisar Folhas"
       onChange={(e) => onSearch(e.target.value)}
       startAdornment={
         <InputAdornment position="start">

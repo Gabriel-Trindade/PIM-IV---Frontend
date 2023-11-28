@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   Box,
   DatePicker,
@@ -18,15 +18,13 @@ import {
 import { useFormik, Field, FieldArray } from "formik";
 import * as Yup from "yup";
 import InputMask from "react-input-mask";
-import registerFuncionario from "../../hooks/useCreateFuncionarios";
+import CreateFolhaPagto from "../../hooks/useCreateFolha";
 import { DesktopDatePicker } from "@mui/x-date-pickers";
 import { format, parse, isValid } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
+import axios from "axios";
 
-
-export const RegisterFuncForm = () => {
-
-
+export const CreateFolha = ({ funcionario, onClose }) => {
   var userDepartamento = localStorage.getItem("departamento");
   var userDepartamentoId = "";
   switch (parseInt(userDepartamento, 10)) {
@@ -47,28 +45,53 @@ export const RegisterFuncForm = () => {
       break;
   }
 
+  const formatData = (data) => {
+    const Data = new Date(data);
+    const dia = Data.getDate().toString().padStart(2, "0");
+    const mes = (Data.getMonth() + 1).toString().padStart(2, "0");
+    const ano = Data.getFullYear();
+    return `${ano}-${mes}-${dia}`;
+  };
+
+  const [nomesUsuarios, setNomesUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch data asynchronously
+    const fetchData = async () => {
+      try {
+        var userDepartamento = localStorage.getItem("departamento");
+        const response = await axios.get(`https://pimbackend.onrender.com/auth/usuarios/departamento/${userDepartamento}`);
+        const options = Array.isArray(response.data) ? response.data : [];
+        const nomes = options.map(usuario => usuario.nome);
+        setNomesUsuarios(nomes);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array to fetch data only once when the component mounts
 
   const formik = useFormik({
     initialValues: {
-      nome: "",
-      cargo: "",
-      salario: "",
-      cpf: "",
-      telefone: "",
-      endereco: "",
-      dataNascimento: "",
-      dtAdmissao: "",
+      nome: funcionario.nome,
+      imposto: "",
+      horasTrabalhadas: "",
+      bonus: "",
+      data_vigencia: "",
+      usuario: "",
       submit: null,
     },
 
     validationSchema: Yup.object({
-      cargo: Yup.string().max(255).required("Cargo é necessário."),
-      salario: Yup.string().max(255).required("Senha é necessária."),
-      nome: Yup.string().max(255).required("Nome é necessário."),
-      cpf: Yup.string().max(255).required("Nome é necessário."),
-      telefone: Yup.string().max(255).required("Nome é necessário."),
-      endereco: Yup.string().max(255).required("Departamento é necessário."),
-      dataNascimento: Yup.string().transform((value, originalValue) => {
+      imposto: Yup.number().max(255).required("Imposto em % é necessário."),
+      horasTrabalhadas: Yup.number().max(255).required("Horas trabalhadas é necessário."),
+      bonus: Yup.number().required("Bonus é necessário."),
+      usuario: Yup.string().required("Usuario é necessário."),
+      data_vigencia: Yup.string().transform((value, originalValue) => {
         if (!originalValue) return "";
 
         const [day, month, year] = originalValue.split("/");
@@ -82,27 +105,24 @@ export const RegisterFuncForm = () => {
 
         return "";
       }),
-      dtAdmissao: Yup.string().max(255).required("Data de admissão é necessária."),
 
       // ... outras validações
     }),
     onSubmit: async (values, helpers) => {
       try {
         var userDepartamento = localStorage.getItem("departamento");
-        await registerFuncionario(
-          values.nome,
-          values.cargo,
-          parseFloat(values.salario),
-          values.cpf,
-          values.telefone,
-          values.endereco,
-          values.dtAdmissao,
-          userDepartamento,
-          values.dataNascimento
+        var departamentoId = parseInt(userDepartamento);
+        await CreateFolhaPagto(
+          parseInt(funcionario.id),
+          values.imposto,
+          values.horasTrabalhadas,
+          parseFloat(values.bonus),
+          values.data_vigencia,
+          values.usuario
         );
-        console.log(values, userDepartamento);
+        console.log(values, funcionario.id);
         helpers.setStatus({ success: true });
-        helpers.setErrors({ submit: "Funcionario registrado com sucesso!" });
+        helpers.setErrors({ submit: "Folha criada com sucesso!" });
         helpers.setSubmitting(true);
       } catch (err) {
         console.log(err);
@@ -136,7 +156,7 @@ export const RegisterFuncForm = () => {
       <Card>
         <CardHeader
           subheader="Preencha as informações de acordo com o funcionário de seu departamento"
-          title="Registrar novo Funcionário"
+          title="Preencher Folha de pagamento"
         />
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
@@ -146,109 +166,72 @@ export const RegisterFuncForm = () => {
                   error={!!(formik.touched.nome && formik.errors.nome)}
                   fullWidth
                   helperText={formik.touched.nome && formik.errors.nome}
-                  label="Nome"
+                  label="Funcionário Selecionado"
                   name="nome"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
-                  value={formik.values.nome}
+                  value={funcionario.nome}
                 />
               </Grid>
               <Grid xs={12} md={6}>
                 <TextField
-                  error={!!(formik.touched.cargo && formik.errors.cargo)}
+                  error={!!(formik.touched.imposto && formik.errors.imposto)}
                   fullWidth
-                  helperText={formik.touched.cargo && formik.errors.cargo}
-                  label="Cargo"
-                  name="cargo"
+                  helperText={formik.touched.imposto && formik.errors.imposto}
+                  label="Imposto (em %)"
+                  name="imposto"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
-                  value={formik.values.cargo}
+                  value={formik.values.imposto}
                 />
               </Grid>
               <Grid xs={12} md={6}>
                 <TextField
-                  error={!!(formik.touched.salario && formik.errors.salario)}
+                  error={!!(formik.touched.horasTrabalhadas && formik.errors.horasTrabalhadas)}
                   fullWidth
-                  helperText={formik.touched.salario && formik.errors.salario}
-                  label="Salário"
-                  name="salario"
+                  helperText={formik.touched.horasTrabalhadas && formik.errors.horasTrabalhadas}
+                  label="Horas Trabalhadas"
+                  name="horasTrabalhadas"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
-                  value={formik.values.salario}
+                  value={formik.values.horasTrabalhadas}
                 />
               </Grid>
               <Grid xs={12} md={6}>
                 <TextField
-                  error={!!(formik.touched.cpf && formik.errors.cpf)}
+                  error={!!(formik.touched.bonus && formik.errors.bonus)}
                   fullWidth
-                  helperText={formik.touched.cpf && formik.errors.cpf}
-                  label="CPF"
-                  name="cpf"
+                  helperText={formik.touched.bonus && formik.errors.bonus}
+                  label="Bônus"
+                  name="bonus"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
-                  value={formik.values.cpf}
-                />
-              </Grid>
-              <Grid xs={12} md={6}>
-                <TextField
-                  error={!!(formik.touched.telefone && formik.errors.telefone)}
-                  fullWidth
-                  helperText={formik.touched.telefone && formik.errors.telefone}
-                  label="Telefone"
-                  name="telefone"
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                  value={formik.values.telefone}
-                />
-              </Grid>
-              <Grid xs={12} md={6}>
-                <TextField
-                  error={!!(formik.touched.endereco && formik.errors.endereco)}
-                  fullWidth
-                  helperText={formik.touched.endereco && formik.errors.endereco}
-                  label="Endereço"
-                  name="endereco"
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                  value={formik.values.endereco}
+                  value={formik.values.bonus}
                 />
               </Grid>
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
-                  error={!!(formik.touched.dataNascimento && formik.errors.dataNascimento)}
-                  helperText={formik.touched.dataNascimento && formik.errors.dataNascimento}
+                  error={!!(formik.touched.data_vigencia && formik.errors.data_vigencia)}
+                  helperText={formik.touched.data_vigencia && formik.errors.data_vigencia}
                   type="date"
-                  id="dataNascimento"
-                  name="dataNascimento"
-                  label="Data de nascimento"
+                  id="data_vigencia"
+                  name="data_vigencia"
+                  label="Data de Vigência"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
-                  value={formik.values.dataNascimento}
+                  value={formik.values.data_vigencia}
                 />
               </Grid>
               <Grid xs={12} md={6}>
-                <TextField
-                 fullWidth
-                 error={!!(formik.touched.dtAdmissao && formik.errors.dtAdmissao)}
-                 helperText={formik.touched.dtAdmissao && formik.errors.dtAdmissao}
-                 type="date"
-                 id="dtAdmissao"
-                 name="dtAdmissao"
-                 label="Data de admissão"
-                 onBlur={formik.handleBlur}
-                 onChange={formik.handleChange}
-                 value={formik.values.dtAdmissao}
-                />
-              </Grid>
-              <Grid xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Departamento"
-                  name="departamento"
-                  onChange={formik.handleChange}
-                  disabled={true}
-                  value={userDepartamentoId}
+                <Autocomplete
+                fullWidth
+                options={nomesUsuarios}
+                error={!!(formik.touched.usuario && formik.errors.usuario)}
+                renderInput={(params) => <TextField {...params} label="Usuario" />}
+                name="usuario"
+                value={formik.values.usuario}
+                onChange={(e, value) => formik.setFieldValue('usuario', value)}
                 />
               </Grid>
               {formik.errors.submit && (

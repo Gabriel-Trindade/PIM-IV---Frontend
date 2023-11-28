@@ -18,17 +18,19 @@ import {
   Typography,
   SvgIcon,
   Unstable_Grid2 as Grid,
+  Tab,
 } from "@mui/material";
 import { Scrollbar } from "src/components/scrollbar";
 import { getInitials } from "src/utils/get-initials";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
-import { EditFunc } from "src/sections/forms/edit-func-form";
+import { EditFolhas } from "src/sections/forms/edit-folha-form";
 import { CreateFolha } from "src/sections/forms/create-folha-form";
 import { useState, useEffect } from "react";
-import Add from "@heroicons/react/24/solid/PlusIcon";
+import Lupa from "@heroicons/react/24/solid/MagnifyingGlassIcon";
 import TrashIcon from "@heroicons/react/24/solid/TrashIcon";
 import PencilSquareIcon from "@heroicons/react/24/solid/PencilSquareIcon";
+import { GetFolhaPagamento } from "../forms/get-folha-form";
 
 // Criar um tema personalizado
 const theme = createTheme({
@@ -65,35 +67,35 @@ const style = {
   p: 4,
 };
 
-const deleteFunc = async (id) => {
-  const response = await axios.delete(`https://pimbackend.onrender.com/funcionarios/${id}`);
+const deleteFolha = async (id) => {
+  const response = await axios.delete(`https://pimbackend.onrender.com/folhas_pagamento/${id}`);
   if (response.status === 200) {
     alert("Funcionário deletado com sucesso!");
     window.location.reload();
   }
 };
 
-const fillFunc = async (id) => {
+const fillFolha = async (id) => {
   try {
-    const response = await axios.get(`https://pimbackend.onrender.com/funcionarios/${id}`);
+    const response = await axios.get(`https://pimbackend.onrender.com/folhas_pagamento/${id}`);
     if (response.status === 200) {
       return response.data; // Retorna os dados do funcionário
     }
   } catch (error) {
-    console.error("Erro ao obter dados do funcionário", error);
+    console.error("Erro ao obter dados da folha", error);
     return null;
   }
 };
 
-export const CustomersTable = (props) => {
-  const [editingFuncionario, setEditingFuncionario] = React.useState(null);
-  const [CreatingFolha, setCreatingFolha] = React.useState(null);
+export const FolhasTable = (props) => {
+  const [editingFolhas, setEditingFolhas] = React.useState(null);
+  const [GettingFolha, setGettingFolha] = React.useState(null);
 
-  const editarFunc = async (id) => {
+  const editarFolha = async (id) => {
     try {
-      const data = await fillFunc(id);
+      const data = await fillFolha(id);
       if (data) {
-        setEditingFuncionario(data);
+        setEditingFolhas(data);
         handleOpen(); // Abre o modal ao obter os dados do funcionário
       }
     } catch (error) {
@@ -101,11 +103,11 @@ export const CustomersTable = (props) => {
     }
   };
 
-  const createFolha = async (id) => {
+  const getFolha = async (id) => {
     try {
-      const data = await fillFunc(id);
+      const data = await fillFolha(id);
       if (data) {
-        setCreatingFolha(data);
+        setGettingFolha(data);
         handleOpenFolha(); // Abre o modal ao obter os dados do funcionário
       }
     } catch (error) {
@@ -154,7 +156,7 @@ export const CustomersTable = (props) => {
   return (
     <Card>
       <Scrollbar>
-        <Box sx={{ minWidth: 800 }}>
+        <Box sx={{ minWidth: 1000 }}>
           <Table>
             <TableHead>
               <TableRow>
@@ -172,21 +174,29 @@ export const CustomersTable = (props) => {
                   />
                 </TableCell>
                 <TableCell>Nome</TableCell>
-                <TableCell>Cargo</TableCell>
+                <TableCell>Imposto</TableCell>
+                <TableCell>Valor do Imposto</TableCell>
                 <TableCell>Departamento</TableCell>
-                <TableCell>Celular</TableCell>
-                <TableCell>Registrado em</TableCell>
-                <TableCell>Editar</TableCell>
-                <TableCell>Excluir</TableCell>
-                <TableCell>Registrar Folha</TableCell>
+                <TableCell>Horas Trabalhadas</TableCell>
+                <TableCell>Bônus</TableCell>
+                <TableCell>Valor Bruto</TableCell>
+                <TableCell>Valor Líquido</TableCell>
+                <TableCell>Data de vigência</TableCell>
+                {localStorage.getItem("tipo") === "2" && (
+                  <>
+                    <TableCell>Editar</TableCell>
+                    <TableCell>Excluir</TableCell>
+                  </>
+                )}
+                <TableCell>Visualizar</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((funcionario) => {
-                const isSelected = selected.includes(funcionario.id);
-                const createdAt = funcionario.dtAdmissao;
+              {items.map((folhas) => {
+                const isSelected = selected.includes(folhas.id);
+                const createdAt = folhas.data_vigencia;
 
-                var userDepartamento = funcionario.departamento;
+                var userDepartamento = localStorage.getItem("departamento");
                 var userDepartamentoId = "";
                 switch (parseInt(userDepartamento, 10)) {
                   case 1:
@@ -207,68 +217,75 @@ export const CustomersTable = (props) => {
                 }
 
                 return (
-                  <TableRow hover key={funcionario.id} selected={isSelected}>
+                  <TableRow hover key={folhas.id} selected={isSelected}>
                     <TableCell padding="checkbox">
                       <Checkbox
                         checked={isSelected}
                         onChange={(event) => {
                           if (event.target.checked) {
-                            onSelectOne?.(funcionario.id);
+                            onSelectOne?.(folhas.id);
                           } else {
-                            onDeselectOne?.(funcionario.id);
+                            onDeselectOne?.(folhas.id);
                           }
                         }}
                       />
                     </TableCell>
                     <TableCell>
-                      <Stack alignItems="center" direction="row" spacing={2}>
-                        <Typography variant="subtitle2">{funcionario.nome}</Typography>
+                      <Stack alignItems="center" direction="row" spacing={1}>
+                        <Typography variant="subtitle2">{folhas.nomeFunc}</Typography>
                       </Stack>
                     </TableCell>
-                    <TableCell>{funcionario.cargo}</TableCell>
+                    <TableCell>{`${folhas.imposto} %`}</TableCell>
+                    <TableCell>{`R$ ${folhas.vlImposto}`}</TableCell>
                     <TableCell>{`${userDepartamentoId}`}</TableCell>
-                    <TableCell>{funcionario.telefone}</TableCell>
+                    <TableCell>{`${folhas.horasTrabalhadas} hrs`}</TableCell>
+                    <TableCell>{`R$ ${folhas.bonus}`}</TableCell>
+                    <TableCell>{`R$ ${folhas.salario}`}</TableCell>
+                    <TableCell>{`R$ ${folhas.recebimento}`}</TableCell>
                     <TableCell>{createdAt}</TableCell>
+                    {localStorage.getItem("tipo") === "2" && (
+                      <>
+                        <ThemeProvider theme={theme}>
+                          <TableCell>
+                            <Button
+                              startIcon={
+                                <SvgIcon fontSize="small">
+                                  <PencilSquareIcon />
+                                </SvgIcon>
+                              }
+                              type="button"
+                              variant="contained"
+                              color="warning"
+                              onClick={() => editarFolha(folhas.id)}
+                            ></Button>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              startIcon={
+                                <SvgIcon fontSize="small">
+                                  <TrashIcon />
+                                </SvgIcon>
+                              }
+                              type="button"
+                              variant="contained"
+                              color="danger"
+                              onClick={() => deleteFolha(folhas.id)}
+                            ></Button>
+                          </TableCell>
+                        </ThemeProvider>
+                      </>
+                    )}
                     <ThemeProvider theme={theme}>
                       <TableCell>
                         <Button
-                         startIcon={
-                          <SvgIcon fontSize="small">
-                            <PencilSquareIcon />
-                          </SvgIcon>
-                        }
-                          type="button"
-                          variant="contained"
-                          color="warning"
-                          onClick={() => editarFunc(funcionario.id)}
-                        >
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Button
                           startIcon={
                             <SvgIcon fontSize="small">
-                              <TrashIcon />
-                            </SvgIcon>
-                          }
-                          type="button"
-                          variant="contained"
-                          color="danger"
-                          onClick={() => deleteFunc(funcionario.id)}
-                        >
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          startIcon={
-                            <SvgIcon fontSize="small">
-                              <Add />
+                              <Lupa />
                             </SvgIcon>
                           }
                           variant="contained"
-                          onClick={() => createFolha(funcionario.id)}
-                        >
-                        </Button>
+                          onClick={() => getFolha(folhas.id)}
+                        ></Button>
                       </TableCell>
                     </ThemeProvider>
                   </TableRow>
@@ -297,7 +314,7 @@ export const CustomersTable = (props) => {
         <Box sx={style}>
           <Grid container spacing={3}>
             <Grid xs={12} md={10} lg={11}>
-              <EditFunc funcionario={editingFuncionario} onClose={handleClose} />
+              <EditFolhas folha={editingFolhas} onClose={handleClose} />
             </Grid>
           </Grid>
         </Box>
@@ -312,7 +329,7 @@ export const CustomersTable = (props) => {
         <Box sx={style}>
           <Grid container spacing={3}>
             <Grid xs={12} md={10} lg={11}>
-              <CreateFolha funcionario={CreatingFolha} onClose={handleCloseFolha} />
+              <GetFolhaPagamento folha={GettingFolha} onClose={handleCloseFolha} />
             </Grid>
           </Grid>
         </Box>
@@ -321,7 +338,7 @@ export const CustomersTable = (props) => {
   );
 };
 
-CustomersTable.propTypes = {
+FolhasTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
   onDeselectAll: PropTypes.func,

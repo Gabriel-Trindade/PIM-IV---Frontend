@@ -228,16 +228,6 @@ const Page = () => {
                 </Typography>
               </Stack>
               <div>
-                <Button
-                  startIcon={(
-                    <SvgIcon fontSize="small">
-                      <PlusIcon />
-                    </SvgIcon>
-                  )}
-                  variant="contained"
-                >
-                  Registrar Folha
-                </Button>
               </div>
             </Stack>
             <CustomersSearch />
