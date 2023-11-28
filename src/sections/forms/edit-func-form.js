@@ -67,11 +67,11 @@ export const EditFunc = ({ funcionario, onClose }) => {
 
     validationSchema: Yup.object({
       cargo: Yup.string().max(255).required("Cargo é necessário."),
-      salario: Yup.string().max(255).required("Senha é necessária."),
+      salario: Yup.string().max(255).required("Salário é necessário."),
       nome: Yup.string().max(255).required("Nome é necessário."),
-      cpf: Yup.string().max(255).required("Nome é necessário."),
-      telefone: Yup.string().max(255).required("Nome é necessário."),
-      endereco: Yup.string().max(255).required("Departamento é necessário."),
+      cpf: Yup.string().max(255).required("CPF é necessário."),
+      telefone: Yup.string().max(255).required("Telefone é necessário."),
+      endereco: Yup.string().max(255).required("Endereco é necessário."),
       dataNascimento: Yup.string().transform((value, originalValue) => {
         if (!originalValue) return "";
 

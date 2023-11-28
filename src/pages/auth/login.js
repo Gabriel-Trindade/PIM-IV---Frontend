@@ -40,10 +40,16 @@ const Page = () => {
       try {
         await auth.signIn(values.email, values.password);
         console.log(values);
-        if (localStorage.getItem("tipo") === "1") {
+        if (localStorage.getItem("tipo") === "1" && method === "funcionario") {
           router.push("/folhas");
-        } else {
+        } else if (localStorage.getItem("tipo") === "2" && method === "gerente") {
           router.push("/funcionarios");
+        }
+        else if (localStorage.getItem("tipo") === "1" && method === "gerente"){
+          helpers.setErrors({ submit: "Você não tem permissão para acessar essa página. Ultilize outro login." });
+        }
+        else if (localStorage.getItem("tipo") === "2" && method === "funcionario"){
+          helpers.setErrors({ submit: "Você não tem permissão para acessar essa página. Ultilize outro login." });
         }
         helpers.setStatus({ success: true });
         helpers.setSubmitting(true);
@@ -95,17 +101,6 @@ const Page = () => {
           <div>
             <Stack spacing={1} sx={{ mb: 3 }}>
               <Typography variant="h4">Login</Typography>
-              <Typography color="text.secondary" variant="body2">
-                Empresa, não possui uma conta? &nbsp;
-                <Link
-                  component={NextLink}
-                  href="/auth/register"
-                  underline="hover"
-                  variant="subtitle2"
-                >
-                  Adquira o serviço!
-                </Link>
-              </Typography>
             </Stack>
             <Tabs onChange={handleMethodChange} sx={{ mb: 3 }} value={method}>
               <Tab label="Empresarial" value="gerente" />
@@ -154,7 +149,7 @@ const Page = () => {
                     error={!!(formik.touched.email && formik.errors.email)}
                     fullWidth
                     helperText={formik.touched.email && formik.errors.email}
-                    label="email Cadastrado"
+                    label="Email cadastrado"
                     name="email"
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}

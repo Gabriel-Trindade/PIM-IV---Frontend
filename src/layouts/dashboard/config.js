@@ -44,18 +44,27 @@ export default function getItemsByType() {
           </SvgIcon>
         ),
       },
+      // {
+      //   title: "Ajustes",
+      //   path: "/settings",
+      //   icon: (
+      //     <SvgIcon fontSize="small">
+      //       <CogIcon />
+      //     </SvgIcon>
+      //   ),
+      // },
       {
-        title: "Ajustes",
-        path: "/settings",
+        title: "Cadastrar Login Funcionário",
+        path: "/auth/registerFunc",
         icon: (
           <SvgIcon fontSize="small">
-            <CogIcon />
+            <UserPlusIcon />
           </SvgIcon>
         ),
       },
       {
-        title: "Cadastrar Login Funcionário",
-        path: "/auth/registerFunc",
+        title: "Cadastrar Novo Usuário",
+        path: "/auth/register",
         icon: (
           <SvgIcon fontSize="small">
             <UserPlusIcon />

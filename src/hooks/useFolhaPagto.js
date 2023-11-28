@@ -21,7 +21,6 @@ const getFolhas = () => {
         const departamentoId = localStorage.getItem("departamento");
         const tipo = localStorage.getItem("tipo");
         const usuario = localStorage.getItem("nome");
-        console.log(departamentoId);
         if (tipo === "1") {
           const response = await axios.get(
             `https://pimbackend.onrender.com/folhas_pagamento/usuario/${usuario}`
@@ -38,15 +37,12 @@ const getFolhas = () => {
             `https://pimbackend.onrender.com/folhas_pagamento/departamento/${departamentoId}`
           );
           const folhasList = typeof response.data === "object" ? response.data : [response.data];
-          console.log(typeof response.data);
           folhasList.forEach((folhas) => {
             folhas.data_vigencia = formatarData(folhas.data_vigencia);
           });
           setFolhasPagto(folhasList);
           setLoading(false);
         }
-
-        console.log(response.data);
       } catch (error) {
         console.error("Erro ao buscar dados dos funcionários", error);
       }

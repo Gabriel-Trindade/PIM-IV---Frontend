@@ -86,7 +86,6 @@ const Page = () => {
               <div>
               </div>
             </Stack>
-            <CustomersSearch />
             <FolhasTable
               count={folhas.length}
               items={applyPagination(folhas, page, rowsPerPage)}

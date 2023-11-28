@@ -70,7 +70,7 @@ export const AccountPopover = (props) => {
           },
         }}
       >
-        <MenuItem onClick={handleSignOutClick}>Sign out</MenuItem>
+        <MenuItem onClick={handleSignOutClick}>Sair</MenuItem>
       </MenuList>
     </Popover>
   );

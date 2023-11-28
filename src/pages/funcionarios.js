@@ -230,7 +230,6 @@ const Page = () => {
               <div>
               </div>
             </Stack>
-            <CustomersSearch />
             <CustomersTable
               count={func.length}
               items={applyPagination(func, page, rowsPerPage)}

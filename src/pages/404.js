@@ -7,7 +7,7 @@ const Page = () => (
   <>
     <Head>
       <title>
-        404 | Devias Kit
+        404 | iStorm RH
       </title>
     </Head>
     <Box
@@ -48,19 +48,19 @@ const Page = () => (
             sx={{ mb: 3 }}
             variant="h3"
           >
-            404: The page you are looking for isn’t here
+            404: A Página que você preocura não está aqui.
           </Typography>
           <Typography
             align="center"
             color="text.secondary"
             variant="body1"
           >
-            You either tried some shady route or you came here by mistake.
-            Whichever it is, try using the navigation
+            Você tentou acessar alguma rota misteriosa, e te pegamos!
           </Typography>
           <Button
-            component={NextLink}
-            href="/"
+            onClick={() => {
+              window.location.href = "localhost:4000/login";
+            }}
             startIcon={(
               <SvgIcon fontSize="small">
                 <ArrowLeftIcon />
@@ -68,8 +68,10 @@ const Page = () => (
             )}
             sx={{ mt: 3 }}
             variant="contained"
+            passHref
+            customProp="localhost:4000/login"
           >
-            Go back to dashboard
+            Volte para a página inicial.
           </Button>
         </Box>
       </Container>
