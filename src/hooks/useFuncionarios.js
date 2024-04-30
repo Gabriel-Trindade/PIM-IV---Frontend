@@ -22,13 +22,11 @@ const useFuncionarios = () => {
           console.log(departamentoId);
           const response = await axios.get(`https://pimbackend.onrender.com/funcionarios/departamento/${departamentoId}`);
           const funcionariosList = typeof response.data === 'object' ? response.data : [response.data];
-          console.log(typeof response.data)
           funcionariosList.forEach((funcionario) => {
             funcionario.dtAdmissao = formatarData(funcionario.dtAdmissao);
           })
           setFuncionarios(funcionariosList);
           setLoading(false);
-          console.log(response.data)
         } catch (error) {
           console.error('Erro ao buscar dados dos funcionários', error);
         }
